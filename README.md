@@ -1,1 +1,1 @@
-Personal Finance Tracker - Track and log different transactions, get summaries of income and expenses, and view data in a graph. Data is stored in a CSV file, wuth theuse of pandas and graphed using matplotlib. 
+Personal Finance Tracker - Track and log different transactions, get summaries of income and expenses, and view data in a graph. Data is stored in a CSV file, with the use of pandas and graphed using matplotlib. 
