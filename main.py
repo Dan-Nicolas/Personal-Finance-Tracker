@@ -81,13 +81,61 @@ def plot_transactions(df):
     plt.grid(True)
     plt.show()
 
+def plot_income_vs_expense_pie(df):
+    income = df[df["category"] == "Income"]["amount"].sum()
+    expense = df[df["category"] == "Expense"]["amount"].sum()
+    labels = ['Income', 'Expense']
+    sizes = [income, expense]
+    colors = ['#66b3ff','#ff6666']
+    
+    plt.figure(figsize=(7,7))
+    plt.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%', startangle=140)
+    plt.title("Income vs Expense Distribution")
+    plt.axis('equal')
+    plt.show()
+
+
+def plot_monthly_summary_bar(df):
+    df['month'] = df.index.to_period('M')
+    monthly_summary = df.groupby(['month', 'category'])['amount'].sum().unstack()
+    
+    monthly_summary.plot(kind='bar', figsize=(10, 6), stacked=True)
+    plt.title('Monthly Income and Expenses')
+    plt.xlabel('Month')
+    plt.ylabel('Amount')
+    plt.grid(True)
+    plt.show()
+
+
+def aggregate_income_expense(df, period='M'):
+    # Resample the data based on the provided period
+    aggregated_df = df.resample(period).sum()
+    return aggregated_df
+
+
+def plot_income_vs_expense_comparison(df, period='M'):
+    aggregated_df = aggregate_income_expense(df, period)
+    
+    plt.figure(figsize=(10, 6))
+    plt.plot(aggregated_df.index, aggregated_df["amount"], label="Net Savings", color="b")
+    plt.fill_between(aggregated_df.index, aggregated_df["amount"], color="b", alpha=0.1)
+    plt.title(f'Income vs Expense ({period}-wise)')
+    plt.xlabel('Date')
+    plt.ylabel('Amount')
+    plt.grid(True)
+    plt.legend()
+    plt.show()
 
 def main():
     while True:
         print("\n1. Add a new transaction.")
-        print("2. View transaction and summary within a date range")
-        print("3. Exit")
-        choice = input("Enter your choice (1-3): ")
+        print("2. View transaction and summary within a date range.")
+        print("3. View Income vs Expense pie chart.")
+        print("4. View Monthly Income vs Expense bar graph.")
+        print("5. Compare Income vs Expense over time.")
+        print("6. Exit")
+        choice = input("Enter your choice (1-6): ")
+        
         if choice == "1":
             add()
         elif choice == "2":
@@ -97,10 +145,27 @@ def main():
             if input("Do you want to see this on a graph (y/n)").lower() == "y":
                 plot_transactions(df)
         elif choice == "3":
+            df = pd.read_csv(CSV.CSV_FILE)
+            df["date"] = pd.to_datetime(df["date"], format=CSV.FORMAT)
+            plot_income_vs_expense_pie(df)
+        elif choice == "4":
+            df = pd.read_csv(CSV.CSV_FILE)
+            df["date"] = pd.to_datetime(df["date"], format=CSV.FORMAT)
+            df.set_index("date", inplace=True)
+            plot_monthly_summary_bar(df)
+        elif choice == "5":
+            df = pd.read_csv(CSV.CSV_FILE)
+            df["date"] = pd.to_datetime(df["date"], format=CSV.FORMAT)
+            df.set_index("date", inplace=True)
+            period = input("Enter the comparison period ('D' for daily, 'W' for weekly, 'M' for monthly, 'Y' for yearly): ").upper()
+            plot_income_vs_expense_comparison(df, period)
+        elif choice == "6":
             print("Exiting....")
             break
         else:
-            print("Invalid choice. Enter 1, 2, or 3.")
+            print("Invalid choice. Enter 1, 2, 3, 4, 5, or 6.")
+
+
     
 if __name__ == "__main__":
     main()
